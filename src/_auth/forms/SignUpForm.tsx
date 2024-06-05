@@ -15,9 +15,12 @@ import { z } from "zod";
 import Loader from "@/components/shared/Loader";
 import { Link } from "react-router-dom";
 import { createUserAccount } from "@/lib/appwrite/api";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function SignUpForm() {
   const isLoading = false;
+  const { toast } = useToast();
+
   const form = useForm<z.infer<typeof SignUpValidationSchema>>({
     resolver: zodResolver(SignUpValidationSchema),
     defaultValues: {
@@ -35,7 +38,10 @@ export default function SignUpForm() {
       name: values.name,
       username: values.username,
     });
-    console.log(newUser);
+    if (!newUser) {
+      toast({ title: "Something went wrong..." });
+      return;
+    }
   }
 
   return (
