@@ -14,6 +14,7 @@ import { SignUpValidationSchema } from "@/lib/validation";
 import { z } from "zod";
 import Loader from "@/components/shared/Loader";
 import { Link } from "react-router-dom";
+import { createUserAccount } from "@/lib/appwrite/api";
 
 export default function SignUpForm() {
   const isLoading = false;
@@ -26,10 +27,15 @@ export default function SignUpForm() {
       password: "",
     },
   });
-  function onSubmit(values: z.infer<typeof SignUpValidationSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+
+  async function onSubmit(values: z.infer<typeof SignUpValidationSchema>) {
+    const newUser = await createUserAccount({
+      email: values.email,
+      password: values.password,
+      name: values.name,
+      username: values.username,
+    });
+    console.log(newUser);
   }
 
   return (
@@ -92,7 +98,7 @@ export default function SignUpForm() {
                   <Input
                     className="shad-input"
                     placeholder="Email"
-                    type="email"
+                    type="text"
                     {...field}
                   />
                 </FormControl>
