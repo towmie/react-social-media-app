@@ -14,12 +14,18 @@ import { SignUpValidationSchema } from "@/lib/validation";
 import { z } from "zod";
 import Loader from "@/components/shared/Loader";
 import { Link } from "react-router-dom";
-import { createUserAccount } from "@/lib/appwrite/api";
+import { createUserAccount, signInAccount } from "@/lib/appwrite/api";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  useCreateUserAccount,
+  useSignInAccount,
+} from "@/lib/appwrite/mutations";
 
 export default function SignUpForm() {
-  const isLoading = false;
   const { toast } = useToast();
+
+  const { createNewUser, isCreatingUser } = useCreateUserAccount();
+  const { signIn, isSigningIn } = useSignInAccount();
 
   const form = useForm<z.infer<typeof SignUpValidationSchema>>({
     resolver: zodResolver(SignUpValidationSchema),
@@ -42,6 +48,16 @@ export default function SignUpForm() {
       toast({ title: "Something went wrong..." });
       return;
     }
+    const session = await signIn({
+      email: values.email,
+      password: values.password,
+    });
+
+    if (!session) {
+      return toast({ title: "Sign in Failed" });
+    }
+
+    createNewUser(newUser);
   }
 
   return (
@@ -131,7 +147,7 @@ export default function SignUpForm() {
             )}
           />
           <Button className="shad-button_primary" type="submit">
-            {isLoading ? (
+            {isCreatingUser ? (
               <div className="flex-center gap-2">
                 <Loader />
                 Loading...
