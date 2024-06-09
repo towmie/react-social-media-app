@@ -13,16 +13,19 @@ import { Input } from "@/components/ui/input";
 import { SignUpValidationSchema } from "@/lib/validation";
 import { z } from "zod";
 import Loader from "@/components/shared/Loader";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createUserAccount, signInAccount } from "@/lib/appwrite/api";
 import { useToast } from "@/components/ui/use-toast";
 import {
   useCreateUserAccount,
   useSignInAccount,
 } from "@/lib/appwrite/mutations";
+import { useUserContext } from "@/context/AuthContext";
 
 export default function SignUpForm() {
   const { toast } = useToast();
+  const { checkAuthUser, isLoading } = useUserContext();
+  const navigate = useNavigate();
 
   const { createNewUser, isCreatingUser } = useCreateUserAccount();
   const { signIn, isSigningIn } = useSignInAccount();
@@ -44,10 +47,12 @@ export default function SignUpForm() {
       name: values.name,
       username: values.username,
     });
+
     if (!newUser) {
       toast({ title: "Something went wrong..." });
       return;
     }
+
     const session = await signIn({
       email: values.email,
       password: values.password,
@@ -57,7 +62,15 @@ export default function SignUpForm() {
       return toast({ title: "Sign in Failed" });
     }
 
-    createNewUser(newUser);
+    const isLogged = await checkAuthUser();
+
+    if (isLogged) {
+      form.reset();
+
+      navigate("/");
+    } else {
+      toast({ title: "Sign in Failed" });
+    }
   }
 
   return (
