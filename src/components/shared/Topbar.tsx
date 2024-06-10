@@ -20,8 +20,8 @@ export default function Topbar() {
           <img
             src="/assets/images/logo.svg"
             alt="logo"
-            width={325}
-            height={130}
+            width={130}
+            height={325}
           />
         </Link>
         <div className="flex gap-4">
