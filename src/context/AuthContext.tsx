@@ -23,7 +23,7 @@ export const INITIAL_USER = {
 
 export const INITIAL_STATE = {
   user: INITIAL_USER,
-  isloading: false,
+  isLoading: false,
   isAuthenticated: false,
   setUser: () => {},
   setIsAuthenticated: () => {},
@@ -45,7 +45,7 @@ export default function AuthProvider({
   const checkAuthUser = async () => {
     try {
       const currentAcc = await getCurrentUser();
-      if (currentAcc)
+      if (currentAcc) {
         setUser({
           id: currentAcc.$id,
           name: currentAcc.name,
@@ -55,9 +55,11 @@ export default function AuthProvider({
           bio: currentAcc.bio,
         });
 
-      setIsAuthenticated(true);
+        setIsAuthenticated(true);
 
-      return true;
+        return true;
+      }
+      return false;
     } catch (error) {
       console.log(error);
       return false;
@@ -68,8 +70,8 @@ export default function AuthProvider({
 
   useEffect(() => {
     if (
-      localStorage.getItem("cookieFallback" === "[]") ||
-      localStorage.getItem("cookieFallback" === null)
+      localStorage.getItem("cookieFallback") === "[]" ||
+      localStorage.getItem("cookieFallback") === null
     ) {
       navigate("/sign-in");
     }

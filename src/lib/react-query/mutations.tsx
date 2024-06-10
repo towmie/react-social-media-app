@@ -4,22 +4,19 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { createUserAccount, signInAccount } from "./api";
+import { create } from "domain";
+import { createUserAccount, signInAccount } from "../appwrite/api";
 import { INewUser } from "@/types";
 
 export function useCreateUserAccount() {
-  const { mutate: createNewUser, isLoading: isCreatingUser } = useMutation({
+  return useMutation({
     mutationFn: (user: INewUser) => createUserAccount(user),
   });
-
-  return { createNewUser, isCreatingUser };
 }
 
 export function useSignInAccount() {
-  const { mutate: signIn, isLoading: isSigningIn } = useMutation({
+  return useMutation({
     mutationFn: (user: { email: string; password: string }) =>
       signInAccount(user),
   });
-
-  return { signIn, isSigningIn };
 }
