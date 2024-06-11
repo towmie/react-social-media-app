@@ -22,5 +22,5 @@ export const PostValidationSchema = z.object({
   caption: z.string().min(2).max(100),
   file: z.custom<File[]>(),
   location: z.string().min(2).max(100),
-  tags: z.array(z.string()),
+  tags: z.string(),
 });

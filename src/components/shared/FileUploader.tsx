@@ -24,8 +24,6 @@ function FileUploader({ fieldChange, mediaUrl }: FileUploaderProps) {
     accept: { "image/*": [".svg", ".png", ".jpg"] },
   });
 
-  console.log(fileUrl);
-
   return (
     <div>
       <div
