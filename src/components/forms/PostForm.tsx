@@ -146,6 +146,7 @@ function PostForm({ post, action }: PostFormProps) {
             Cancel
           </Button>
           <Button
+            disabled={isCreatingPost || isUpdatingPost}
             type="submit"
             className="shad-button_primary whitespace-nowrap"
           >
