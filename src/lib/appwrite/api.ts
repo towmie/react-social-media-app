@@ -1,7 +1,8 @@
 import { ID, Query } from "appwrite";
 
 import { IUpdatePost, INewPost, INewUser, IUpdateUser } from "@/types";
-import { account, appwriteConfig, databases } from "./config";
+import { account, appwriteConfig, databases, avatars, storage } from "./config";
+import { log } from "console";
 
 // ============================================================
 // AUTH
@@ -26,7 +27,7 @@ export async function createUserAccount(user: INewUser) {
       name: newAccount.name,
       email: newAccount.email,
       username: user.username,
-      imageUrl: avatarUrl,
+      imageURL: avatarUrl,
     });
 
     return newUser;
@@ -36,12 +37,11 @@ export async function createUserAccount(user: INewUser) {
   }
 }
 
-// ============================== SAVE USER TO DB
 export async function saveUserToDB(user: {
   accountId: string;
   email: string;
   name: string;
-  imageUrl: URL;
+  imageURL: URL;
   username?: string;
 }) {
   try {
@@ -58,7 +58,6 @@ export async function saveUserToDB(user: {
   }
 }
 
-// ============================== SIGN IN
 export async function signInAccount(user: { email: string; password: string }) {
   try {
     const session = await account.createSession(user.email, user.password);
@@ -78,7 +77,6 @@ export async function signOutAccount() {
   }
 }
 
-// ============================== GET ACCOUNT
 export async function getAccount() {
   try {
     const currentAccount = await account.get();
@@ -110,5 +108,82 @@ export async function getCurrentUser() {
   } catch (error) {
     console.log(error);
     return null;
+  }
+}
+
+export async function uploadFile(file: File) {
+  try {
+    const uploadedfile = await storage.createFile(
+      appwriteConfig.storageId,
+      ID.unique(),
+      file
+    );
+    return uploadedfile;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getFilePreview(fileId: string) {
+  try {
+    const file = await storage.getFilePreview(
+      appwriteConfig.storageId,
+      fileId,
+      2000,
+      2000,
+      "top",
+      100
+    );
+    return file;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function deleteFile(fileId: string) {
+  try {
+    const file = await storage.deleteFile(appwriteConfig.storageId, fileId);
+    return file;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function createPost(post: INewPost) {
+  try {
+    const uploadedfile = await uploadFile(post.file[0]);
+
+    if (!uploadedfile) throw Error;
+    const fileUrl = getFilePreview(uploadedfile.$id);
+
+    if (!fileUrl) {
+      deleteFile(uploadedfile.$id);
+      throw new Error();
+    }
+
+    const tags = post.tags?.replace(/ /g, "").split(",") || [];
+
+    const newPost = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      ID.unique(),
+      {
+        userId: post.userId,
+        caption: post.caption,
+        imageId: uploadedfile.$id,
+        imageURL: fileUrl,
+        location: post.location,
+        tags,
+      }
+    );
+
+    if (!newPost) {
+      deleteFile(uploadedfile.$id);
+      throw new Error();
+    }
+
+    return newPost;
+  } catch (error) {
+    console.log(error);
   }
 }

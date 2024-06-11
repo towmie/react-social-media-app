@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -14,23 +13,43 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import FileUploader from "../shared/FileUploader";
+import { PostValidationSchema } from "@/lib/validation";
+import { Models } from "appwrite";
+import { useUserContext } from "@/context/AuthContext";
+import { useToast } from "../ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
-const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-});
+type PostFormProps = {
+  post?: Models.Document;
+};
 
-function PostForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+function PostForm({ post }: PostFormProps) {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const { mutateAsync: createPost, isPending: isCreatingPost } =
+    useCreatePost();
+  const { user } = useUserContext();
+
+  const form = useForm<z.infer<typeof PostValidationSchema>>({
+    resolver: zodResolver(PostValidationSchema),
     defaultValues: {
-      username: "",
+      caption: post ? post?.caption : "",
+      file: [],
+      location: post ? post?.location : "",
+      tags: post ? post?.tags.join(",") : "",
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
+  async function onSubmit(data: z.infer<typeof PostValidationSchema>) {
+    const newPost = await createPost({
+      ...data,
+      userId: user?.id,
+    });
+
+    if (!newPost) return toast({ title: "Failed to create post" });
+
+    navigate("/");
   }
   return (
     <Form {...form}>
@@ -61,7 +80,10 @@ function PostForm() {
             <FormItem>
               <FormLabel className="shad-form_label">Add photos</FormLabel>
               <FormControl>
-                <FileUploader />
+                <FileUploader
+                  fieldChange={field.onChange}
+                  mediaUrl={post?.imageURL}
+                />
               </FormControl>
               <FormMessage className="shad-form_message" />
             </FormItem>
@@ -74,7 +96,7 @@ function PostForm() {
             <FormItem>
               <FormLabel className="shad-form_label">Location</FormLabel>
               <FormControl>
-                <Input type="text" className="shad-input" />
+                <Input type="text" className="shad-input" {...field} />
               </FormControl>
               <FormMessage className="shad-form_message" />
             </FormItem>
@@ -93,6 +115,7 @@ function PostForm() {
                   type="text"
                   className="shad-input"
                   placeholder="react, js, frontend"
+                  {...field}
                 />
               </FormControl>
               <FormMessage className="shad-form_message" />
