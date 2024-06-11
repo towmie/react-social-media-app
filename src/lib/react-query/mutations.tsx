@@ -9,6 +9,7 @@ import {
   createPost,
   createUserAccount,
   deleteSavePost,
+  getCurrentUser,
   getPosts,
   likePost,
   savePost,
@@ -118,5 +119,12 @@ export function useDeletePosts() {
         queryKey: [QUERY_KEYS.GET_CURRENT_USER],
       });
     },
+  });
+}
+
+export function useGetCurrnetUser() {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_CURRENT_USER],
+    queryFn: () => getCurrentUser(),
   });
 }
