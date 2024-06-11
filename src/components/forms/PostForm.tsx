@@ -18,15 +18,19 @@ import { Models } from "appwrite";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "../ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useCreatePost } from "@/lib/react-query/mutations";
+import { useCreatePost, useUpdatePost } from "@/lib/react-query/mutations";
 
 type PostFormProps = {
+  action: "create" | "update";
   post?: Models.Document;
 };
 
-function PostForm({ post }: PostFormProps) {
+function PostForm({ post, action }: PostFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const { mutateAsync: updatePost, isPending: isUpdatingPost } =
+    useUpdatePost();
 
   const { mutateAsync: createPost, isPending: isCreatingPost } =
     useCreatePost();
@@ -43,6 +47,19 @@ function PostForm({ post }: PostFormProps) {
   });
 
   async function onSubmit(data: z.infer<typeof PostValidationSchema>) {
+    if (post && action === "update") {
+      const updatedPost = await updatePost({
+        ...data,
+        postId: post?.$id,
+        imageId: post?.imageId,
+        imageURL: post?.imageURL,
+      });
+
+      if (!updatedPost) return toast({ title: "Failed to update post" });
+
+      return navigate(`/posts/${post.$id}`);
+    }
+
     const newPost = await createPost({
       ...data,
       userId: user?.id,
@@ -52,6 +69,7 @@ function PostForm({ post }: PostFormProps) {
 
     navigate("/");
   }
+
   return (
     <Form {...form}>
       <form
