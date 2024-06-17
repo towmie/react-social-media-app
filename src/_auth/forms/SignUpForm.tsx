@@ -1,213 +1,132 @@
-import * as z from "zod";
-import { useForm } from "react-hook-form";
+import Form from "@/components/shared/Form";
 import { Link, useNavigate } from "react-router-dom";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import Loader from "@/components/shared/Loader";
-import { useToast } from "@/components/ui/use-toast";
-
-import {
-  useCreateUserAccount,
-  useSignInAccount,
-} from "@/lib/react-query/mutations";
-import { SignUpValidationSchema } from "@/lib/validation";
-import { useUserContext } from "@/context/AuthContext";
+import FormRowVertical from "@/components/shared/FormRowVertical";
+import { useForm } from "react-hook-form";
+import { FormEvent } from "react";
+import Input from "@/components/shared/Input";
+import FormRow from "@/components/shared/FormRow";
+import Button from "@/components/shared/Button";
+import { useSignUp } from "@/lib/react-query/mutations";
 
 const SignupForm = () => {
-  const { toast } = useToast();
+  const { register, formState, getValues, handleSubmit, reset } = useForm();
+  const { errors } = formState;
+  const { signUp } = useSignUp();
   const navigate = useNavigate();
-  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
 
-  const { mutateAsync: createUserAccount, isPending: isCreatingUser } =
-    useCreateUserAccount();
-  const { mutateAsync: signInAccount, isPending: isSigningIn } =
-    useCreateUserAccount();
+  function onHandleSubmit(data: FormEvent) {
+    console.log(data);
 
-  const form = useForm<z.infer<typeof SignUpValidationSchema>>({
-    resolver: zodResolver(SignUpValidationSchema),
-    defaultValues: {
-      name: "",
-      username: "",
-      email: "",
-      password: "",
-    },
-  });
-
-  // Handler
-  const handleSignup = async (user: z.infer<typeof SignUpValidationSchema>) => {
-    try {
-      const newUser = await createUserAccount(user);
-
-      if (!newUser) {
-        toast({ title: "Sign up failed. Please try again." });
-        return;
-      }
-
-      const session = await signInAccount({
-        email: user.email,
-        password: user.password,
-      });
-
-      if (!session)
-        return toast({
-          title: "Something went wrong. Please login your new account",
-        });
-
-      const isLoggedIn = await checkAuthUser();
-
-      if (isLoggedIn) {
-        form.reset();
+    console.log(data);
+    signUp(data, {
+      onSuccess: () => {
         navigate("/");
-      } else {
-        return toast({ title: "Login failed. Please try again." });
-      }
-    } catch (error) {
-      console.log({ error });
-    }
-  };
-  // const handleSignup = async (user: z.infer<typeof SignUpValidationSchema>) => {
-  //   try {
-  //     const newUser = await createNewUser(user);
+        reset();
+      },
+    });
 
-  //     if (!newUser) {
-  //       toast({ title: "Sign up failed. Please try again." });
+    // if (!email || !password) return;
 
-  //       return;
-  //     }
+    // login(
+    //   { email, password },
+    //   {
+    //     onSettled: () => {
+    //       setEmail("");
+    //       setPassword("");
+    //     },
+    //   }
+    // );
 
-  //     const session = await signIn({
-  //       email: user.email,
-  //       password: user.password,
-  //     });
-
-  //     if (!session) {
-  //       toast({ title: "Something went wrong. Please login your new account" });
-
-  //       navigate("/sign-in");
-
-  //       return;
-  //     }
-
-  //     const isLoggedIn = await checkAuthUser();
-
-  //     if (isLoggedIn) {
-  //       form.reset();
-
-  //       navigate("/");
-  //     } else {
-  //       toast({ title: "Login failed. Please try again." });
-
-  //       return;
-  //     }
-  //   } catch (error) {
-  //     console.log({ error });
-  //   }
-  // };
+    reset();
+  }
 
   return (
-    <Form {...form}>
-      <div className="sm:w-420 flex-center flex-col">
-        <img src="/assets/images/logo.svg" alt="logo" />
+    <div className="sm:w-420 flex-center flex-col">
+      <img src="/assets/images/logo.svg" alt="logo" />
 
-        <h2 className="h3-bold md:h2-bold pt-5 sm:pt-12">
-          Create a new account
-        </h2>
-        <p className="text-light-3 small-medium md:base-regular mt-2">
-          To use snapgram, Please enter your details
-        </p>
+      <h2 className="h3-bold md:h2-bold pt-5 sm:pt-12">Create a new account</h2>
+      <p className="text-light-3 small-medium md:base-regular mt-2">
+        To use snapgram, Please enter your details
+      </p>
 
-        <form
-          onSubmit={form.handleSubmit(handleSignup)}
-          className="flex flex-col gap-5 w-full mt-4"
+      <Form onSubmit={handleSubmit(onHandleSubmit)}>
+        <FormRowVertical label="Full name" error={errors?.full_name?.message}>
+          <Input
+            type="text"
+            id="full_name"
+            // disabled={isLoading}
+            {...register("full_name", { required: "This field is required" })}
+          />
+        </FormRowVertical>
+
+        <FormRowVertical label="Email address" error={errors?.email?.message}>
+          <Input
+            type="email"
+            id="email"
+            // disabled={isLoading}
+            {...register("email", {
+              required: "This field is required",
+              pattern: {
+                value: /\S+@\S+\.\S+/,
+                message: "Please provide a valid email address",
+              },
+            })}
+          />
+        </FormRowVertical>
+
+        <FormRowVertical
+          label="Password (min 8 characters)"
+          error={errors?.password?.message}
         >
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="shad-form_label">Name</FormLabel>
-                <FormControl>
-                  <Input type="text" className="shad-input" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <Input
+            type="password"
+            id="password"
+            // disabled={isLoading}
+            {...register("password", {
+              required: "This field is required",
+              minLength: {
+                value: 8,
+                message: "Password needs a min of 8 characters",
+              },
+            })}
           />
+        </FormRowVertical>
 
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="shad-form_label">Username</FormLabel>
-                <FormControl>
-                  <Input type="text" className="shad-input" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+        <FormRowVertical
+          label="Repeat password"
+          error={errors?.passwordConfirm?.message}
+        >
+          <Input
+            type="password"
+            id="passwordConfirm"
+            // disabled={isLoading}
+            {...register("passwordConfirm", {
+              required: "This field is required",
+              validate: (value: string) =>
+                value === getValues().password || "Passwords need to match",
+            })}
           />
+        </FormRowVertical>
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="shad-form_label">Email</FormLabel>
-                <FormControl>
-                  <Input type="text" className="shad-input" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="shad-form_label">Password</FormLabel>
-                <FormControl>
-                  <Input type="password" className="shad-input" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button type="submit" className="shad-button_primary">
-            {isCreatingUser || isSigningIn || isUserLoading ? (
-              <div className="flex-center gap-2">
-                <Loader /> Loading...
-              </div>
-            ) : (
-              "Sign Up"
-            )}
+        <FormRow>
+          {/* type is an HTML attribute! */}
+          <Button variation="secondary" type="reset">
+            Cancel
           </Button>
+          <Button>Create new user</Button>
+        </FormRow>
+      </Form>
 
-          <p className="text-small-regular text-light-2 text-center mt-2">
-            Already have an account?
-            <Link
-              to="/sign-in"
-              className="text-primary-500 text-small-semibold ml-1"
-            >
-              Log in
-            </Link>
-          </p>
-        </form>
-      </div>
-    </Form>
+      <p className="text-small-regular text-light-2 text-center mt-2">
+        Already have an account?
+        <Link
+          to="/sign-in"
+          className="text-primary-500 text-small-semibold ml-1"
+        >
+          Log in
+        </Link>
+      </p>
+    </div>
   );
 };
 

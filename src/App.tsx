@@ -25,7 +25,7 @@ function App() {
           <Route path="sign-in" element={<SigninForm />} />
           <Route path="sign-up" element={<SignUpForm />} />
         </Route>
-
+{/* 
         <Route element={<RootLayout />}>
           <Route index element={<Home />} />
           <Route path="/explore" element={<Explore />} />
@@ -36,7 +36,7 @@ function App() {
           <Route path="/post/:id" element={<PostDetails />} />
           <Route path="/profile/:id/*" element={<Profile />} />
           <Route path="/update-profile/:id" element={<UpdateProfile />} />
-        </Route>
+        </Route> */}
       </Routes>
       <Toaster />
     </main>
