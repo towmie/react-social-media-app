@@ -14,30 +14,22 @@ const SignupForm = () => {
   const { signUp } = useSignUp();
   const navigate = useNavigate();
 
-  function onHandleSubmit(data: FormEvent) {
-    console.log(data);
+  function onHandleSubmit(data: {
+    full_name: string;
+    email: string;
+    password: string;
+  }) {
+    const { full_name, email, password } = data;
 
-    console.log(data);
-    signUp(data, {
-      onSuccess: () => {
-        navigate("/");
-        reset();
-      },
-    });
-
-    // if (!email || !password) return;
-
-    // login(
-    //   { email, password },
-    //   {
-    //     onSettled: () => {
-    //       setEmail("");
-    //       setPassword("");
-    //     },
-    //   }
-    // );
-
-    reset();
+    signUp(
+      { full_name, email, password },
+      {
+        onSuccess: () => {
+          navigate("/");
+          reset();
+        },
+      }
+    );
   }
 
   return (

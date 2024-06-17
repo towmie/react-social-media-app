@@ -1,7 +1,7 @@
 import supabase, { supabaseURL } from "./../lib/supabase/config";
 
 type signUpProps = {
-  name: string;
+  full_name: string;
   email: string;
   password: string;
 };
@@ -9,18 +9,18 @@ type signUpProps = {
 type loginProps = { email: string; password: string };
 
 type updateCurrentUserProps = {
-  password?: string;
   name?: string;
-  avatar?: string;
+  password?: string;
+  email?: string;
 };
 
-export async function signUp({ name, email, password }: signUpProps) {
+export async function signUp({ full_name, email, password }: signUpProps) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: {
-        name,
+        full_name,
         avatar: "",
       },
     },

@@ -1,134 +1,91 @@
-import * as z from "zod";
-import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import { zodResolver } from "@hookform/resolvers/zod";
+import Button from "@/components/shared/Button";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import Loader from "@/components/shared/Loader";
 import { useToast } from "@/components/ui/use-toast";
-
-// import {
-//   useCreateUserAccount,
-//   useSignInAccount,
-// } from "@/lib/react-query/mutations";
-// import { SignInValidationSchema } from "@/lib/validation";
-// // import { useUserContext } from "@/context/AuthContext";
+import { FormEvent, useState } from "react";
+import FormRowVertical from "@/components/shared/FormRowVertical";
+import { useLogin } from "@/lib/react-query/mutations";
+import Form from "@/components/shared/Form";
+import Input from "@/components/shared/Input";
 
 const SignInForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  // const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
+  const [email, setEmail] = useState("andrei-test@example.com");
+  const [password, setPassword] = useState("12345678");
 
-  // const { mutateAsync: signInAccount, isPending: isSigningIn } =
-  //   useCreateUserAccount();
+  const { login, isPending } = useLogin();
 
-  // const form = useForm<z.infer<typeof SignInValidationSchema>>({
-  //   resolver: zodResolver(SignInValidationSchema),
-  //   defaultValues: {
-  //     email: "",
-  //     password: "",
-  //   },
-  // });
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!email || !password) return;
 
-  // Handler
-  // const handleSignup = async (user: z.infer<typeof SignInValidationSchema>) => {
-  //   try {
-  //     const session = await signInAccount({
-  //       email: user.email,
-  //       password: user.password,
-  //     });
-
-  //     if (!session)
-  //       return toast({
-  //         title: "Something went wrong. Please login your new account",
-  //       });
-
-  //     const isLoggedIn = await checkAuthUser();
-  //     console.log(isLoggedIn);
-
-  //     if (isLoggedIn) {
-  //       form.reset();
-  //       navigate("/");
-  //     } else {
-  //       return toast({ title: "Login failed. Please try again." });
-  //     }
-  //   } catch (error) {
-  //     console.log({ error });
-  //   }
-  // };
+    login(
+      { email, password },
+      {
+        onSuccess: () => {
+          navigate("/");
+        },
+        onSettled: () => {
+          setEmail("");
+          setPassword("");
+        },
+        onError: (err) => {
+          toast({
+            title: "Error",
+            description: err.message,
+          });
+        },
+      }
+    );
+  }
 
   return (
-    <Form>
-      <div className="sm:w-420 flex-center flex-col">
-        <img src="/assets/images/logo.svg" alt="logo" />
-
-        <h2 className="h3-bold md:h2-bold pt-5 sm:pt-12">Welcome back!</h2>
-        <p className="text-light-3 small-medium md:base-regular mt-2">
-          To use snapgram, Please enter your details
-        </p>
-
-        <form
-          // onSubmit={form.handleSubmit(handleSignup)}
-          className="flex flex-col gap-5 w-full mt-4"
+    <div className="sm:w-420 flex-center flex-col">
+      <img src="/assets/images/logo.svg" alt="logo" />
+      <h2 className="h3-bold md:h2-bold pt-5 sm:pt-12">Welcome back</h2>
+      <p className="text-light-3 small-medium md:base-regular mt-2">
+        To use snapgram, Please enter your details
+      </p>
+      <Form onSubmit={handleSubmit}>
+        <FormRowVertical label="Email address">
+          <Input
+            type="email"
+            id="email"
+            // This makes this form better for password managers
+            autoComplete="username"
+            value={email}
+            disabled={isPending}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </FormRowVertical>
+        <FormRowVertical label="Password">
+          <Input
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            disabled={isPending}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </FormRowVertical>
+        <FormRowVertical>
+          <Button disabled={isPending} size="large">
+            {!isPending ? "Login" : <Loader />}
+          </Button>
+        </FormRowVertical>
+      </Form>
+      <p className="text-small-regular text-light-2 text-center mt-2">
+        Don't have an account?
+        <Link
+          to="/sign-up"
+          className="text-primary-500 text-small-semibold ml-1"
         >
-          <FormField
-            // control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="shad-form_label">Email</FormLabel>
-                <FormControl>
-                  <Input type="text" className="shad-input" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            // control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="shad-form_label">Password</FormLabel>
-                <FormControl>
-                  <Input type="password" className="shad-input" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* 
-          <Button type="submit" className="shad-button_primary">
-            {isUserLoading || isSigningIn ? (
-              <div className="flex-center gap-2">
-                <Loader /> Loading...
-              </div>
-            ) : (
-              "Sign Up"
-            )}
-          </Button> */}
-
-          <p className="text-small-regular text-light-2 text-center mt-2">
-            Don't have an account?
-            <Link
-              to="/sign-up"
-              className="text-primary-500 text-small-semibold ml-1"
-            >
-              Sign up
-            </Link>
-          </p>
-        </form>
-      </div>
-    </Form>
+          Sign up
+        </Link>
+      </p>
+    </div>
   );
 };
 

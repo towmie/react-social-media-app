@@ -1,9 +1,9 @@
+import { ButtonHTMLAttributes } from "react";
 import styled, { css } from "styled-components";
 
-interface ButtonProps {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: "small" | "medium" | "large";
   variation?: "primary" | "secondary" | "danger";
-  type: "button" | "submit" | "reset";
 }
 
 const sizes = {
