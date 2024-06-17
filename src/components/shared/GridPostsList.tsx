@@ -1,8 +1,8 @@
 import { Models } from "appwrite";
 import { Link } from "react-router-dom";
 
-import { useUserContext } from "@/context/AuthContext";
-import PostStats from "./PostStats";
+// import { useUserContext } from "@/context/AuthContext";
+// import PostStats from "./PostStats";
 
 type GridPostListProps = {
   posts: Models.Document[];
@@ -15,7 +15,7 @@ const GridPostList = ({
   showUser = true,
   showStats = true,
 }: GridPostListProps) => {
-  const { user } = useUserContext();
+  // const { user } = useUserContext();
 
   return (
     <ul className="grid-container">
@@ -43,7 +43,7 @@ const GridPostList = ({
                 <p className="line-clamp-1">{post.creator.name}</p>
               </div>
             )}
-            {showStats && <PostStats post={post} userId={user.id} />}
+            {/* {showStats && <PostStats post={post} userId={user.id} />} */}
           </div>
         </li>
       ))}

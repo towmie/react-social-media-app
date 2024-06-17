@@ -15,10 +15,10 @@ import { Textarea } from "../ui/textarea";
 import FileUploader from "../shared/FileUploader";
 import { PostValidationSchema } from "@/lib/validation";
 import { Models } from "appwrite";
-import { useUserContext } from "@/context/AuthContext";
+// import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "../ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useCreatePost, useUpdatePost } from "@/lib/react-query/mutations";
+// import { useCreatePost, useUpdatePost } from "@/lib/react-query/mutations";
 
 type PostFormProps = {
   action: "create" | "update";
@@ -29,12 +29,12 @@ function PostForm({ post, action }: PostFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const { mutateAsync: updatePost, isPending: isUpdatingPost } =
-    useUpdatePost();
+  // const { mutateAsync: updatePost, isPending: isUpdatingPost } =
+  //   useUpdatePost();
 
-  const { mutateAsync: createPost, isPending: isCreatingPost } =
-    useCreatePost();
-  const { user } = useUserContext();
+  // const { mutateAsync: createPost, isPending: isCreatingPost } =
+  //   useCreatePost();
+  // const { user } = useUserContext();
 
   const form = useForm<z.infer<typeof PostValidationSchema>>({
     resolver: zodResolver(PostValidationSchema),

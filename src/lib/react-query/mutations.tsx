@@ -1,5 +1,9 @@
-import { login as loginApi, signUp as signUpApi } from "@/_auth/apiAuth";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getCurrentUser,
+  login as loginApi,
+  signUp as signUpApi,
+} from "@/_auth/apiAuth";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
 type SignUpProps = {
@@ -32,4 +36,13 @@ export function useLogin() {
   });
 
   return { login, isPending };
+}
+
+export function useUser() {
+  const { data: user, isLoading } = useQuery({
+    queryFn: () => getCurrentUser(),
+    queryKey: ["user"],
+  });
+
+  return { user, isLoading, isAuthenticated: user?.role === "authenticated" };
 }
