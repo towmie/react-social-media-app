@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import "./globals.css";
 import SigninForm from "./_auth/forms/SigninForm";
 import {
+  CreatePost,
   // AllUsers,
   // CreatePost,
   // Explore,
@@ -34,6 +35,7 @@ function App() {
           }
         >
           <Route index element={<Home />} />
+          <Route path="/create-post" element={<CreatePost />} />
         </Route>
       </Routes>
       <Toaster />

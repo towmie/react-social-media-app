@@ -1,160 +1,103 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "../ui/textarea";
-import FileUploader from "../shared/FileUploader";
+
 import { PostValidationSchema } from "@/lib/validation";
 import { Models } from "appwrite";
 // import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "../ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import Input from "../shared/Input";
+import styled from "styled-components";
+import Textarea from "../shared/Textarea";
+import FileInput from "../shared/FileInput";
+import Button from "../shared/Button";
+import FormRowVertical from "../shared/FormRowVertical";
+import FormRow from "../shared/FormRow";
+import Form from "../shared/Form";
 // import { useCreatePost, useUpdatePost } from "@/lib/react-query/mutations";
 
+const Label = styled.label`
+  font-weight: 500;
+`;
 type PostFormProps = {
   action: "create" | "update";
   post?: Models.Document;
 };
 
 function PostForm({ post, action }: PostFormProps) {
-  const { toast } = useToast();
-  const navigate = useNavigate();
+  // const { toast } = useToast();
+  // const navigate = useNavigate();
+  const isCreatingPost = false;
+  const isUpdatingPost = false;
+  const isEditSession = false;
+  const isWorking = false;
 
-  // const { mutateAsync: updatePost, isPending: isUpdatingPost } =
-  //   useUpdatePost();
+  const { register, handleSubmit, reset, formState, getValues } = useForm();
+  const { errors } = formState;
 
-  // const { mutateAsync: createPost, isPending: isCreatingPost } =
-  //   useCreatePost();
-  // const { user } = useUserContext();
+  function onError(err) {
+    // console.log(err);
+  }
 
-  const form = useForm<z.infer<typeof PostValidationSchema>>({
-    resolver: zodResolver(PostValidationSchema),
-    defaultValues: {
-      caption: post ? post?.caption : "",
-      file: [],
-      location: post ? post?.location : "",
-      tags: post ? post?.tags.join(",") : "",
-    },
-  });
-
-  async function onSubmit(data: z.infer<typeof PostValidationSchema>) {
-    if (post && action === "update") {
-      const updatedPost = await updatePost({
-        ...data,
-        postId: post?.$id,
-        imageId: post?.imageId,
-        imageURL: post?.imageURL,
-      });
-
-      if (!updatedPost) return toast({ title: "Failed to update post" });
-
-      return navigate(`/posts/${post.$id}`);
-    }
-
-    const newPost = await createPost({
-      ...data,
-      userId: user?.id,
-    });
-
-    if (!newPost) return toast({ title: "Failed to create post" });
-
-    navigate("/");
+  async function onHandleSubmit(data) {
+    const image = typeof data.image === "string" ? data.image : data.image[0];
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full flex flex-col gap-9 max-w-5xl"
+    <div className="w-full flex flex-col gap-9 max-w-xl">
+      <Form
+        onSubmit={handleSubmit(onHandleSubmit)}
+        // type={onCloseModal ? "modal" : "regular"}
       >
-        <FormField
-          control={form.control}
-          name="caption"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="shad-form_label">Caption</FormLabel>
-              <FormControl>
-                <Textarea
-                  className="shad-textarea custom-scrollbar"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage className="shad-form_message" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="file"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="shad-form_label">Add photos</FormLabel>
-              <FormControl>
-                <FileUploader
-                  fieldChange={field.onChange}
-                  mediaUrl={post?.imageURL}
-                />
-              </FormControl>
-              <FormMessage className="shad-form_message" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="shad-form_label">Location</FormLabel>
-              <FormControl>
-                <Input type="text" className="shad-input" {...field} />
-              </FormControl>
-              <FormMessage className="shad-form_message" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="tags"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="shad-form_label">
-                Add tags (separated by comma - " , ")
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  className="shad-input"
-                  placeholder="react, js, frontend"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage className="shad-form_message" />
-            </FormItem>
-          )}
-        />
-        <div className="flex gap-4 justify-end items-center">
-          <Button type="button" className="shad-button_dark_4">
+        <FormRowVertical error={errors?.caption?.message} label="Caption">
+          <Input type="text" id="caption" {...register("caption")} />
+        </FormRowVertical>
+
+        <FormRowVertical>
+          <Label htmlFor="image">Add photos</Label>
+          <FileInput
+            id="image"
+            accept="image/*"
+            {...register("image", {
+              required: isEditSession ? false : "This field is required",
+            })}
+          />
+        </FormRowVertical>
+
+        <FormRowVertical error={errors?.location?.message} label="Location">
+          <Input type="text" id="location" {...register("location")} />
+        </FormRowVertical>
+
+        <FormRowVertical
+          label="Add tags (separated by comma)"
+          error={errors?.tags?.message}
+        >
+          <Input
+            type="text"
+            id="tags"
+            {...register("tags", {
+              required: "This field is required",
+              min: {
+                value: 0,
+                message: "The price should be at least 10",
+              },
+            })}
+          />
+        </FormRowVertical>
+
+        <FormRow>
+          <Button
+            variation="secondary"
+            type="reset"
+            // onClick={() => onCloseModal?.()}
+          >
             Cancel
           </Button>
-          <Button
-            disabled={isCreatingPost || isUpdatingPost}
-            type="submit"
-            className="shad-button_primary whitespace-nowrap"
-          >
-            Submit
+          <Button type="submit" disabled={isWorking}>
+            {isEditSession ? "Edit cabin" : "Create new Cabin"}
           </Button>
-        </div>
-      </form>
-    </Form>
+        </FormRow>
+      </Form>
+    </div>
   );
 }
 

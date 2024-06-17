@@ -5,12 +5,14 @@ import { INavLink } from "@/types";
 import { useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
+import { useLogout } from "@/lib/react-query/mutations";
 
 export default function LeftSidebar() {
   const { pathname } = useLocation();
   // const { mutate: signOut, isSuccess } = useSignOutAccount();
-  const navifate = useNavigate();
+
   // const { user } = useUserContext();
+  const { logout } = useLogout();
 
   // useEffect(() => {
   //   if (isSuccess) navifate(0);
@@ -66,14 +68,14 @@ export default function LeftSidebar() {
           })}
         </ul>
       </div>
-      {/* <Button
+      <Button
         variant="ghost"
         className="shad-button_ghost"
-        onClick={() => signOut}
+        onClick={() => logout()}
       >
         <img src="/assets/icons/logout.svg" alt="logout" />
         <p className="smal-medium lg:base-medium">Logout</p>
-      </Button> */}
+      </Button>
     </nav>
   );
 }

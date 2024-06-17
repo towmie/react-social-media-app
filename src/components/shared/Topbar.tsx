@@ -1,11 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
-import { useSignOutAccount } from "@/lib/react-query/mutations";
+import { useLogout, useSignOutAccount } from "@/lib/react-query/mutations";
 import { useEffect } from "react";
 
 export default function Topbar() {
-  // const { mutate: signOut, isSuccess } = useSignOutAccount();
   const navigate = useNavigate();
+  const { logout } = useLogout();
   // const { user } = useUserContext();
 
   // useEffect(() => {
@@ -27,7 +27,7 @@ export default function Topbar() {
           <Button
             variant="ghost"
             className="shad-button_ghost"
-            // onClick={() => signOut}
+            onClick={() => logout()}
           >
             <img src="/assets/icons/logout.svg" alt="logout" />
           </Button>

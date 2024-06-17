@@ -1,6 +1,7 @@
 import {
   getCurrentUser,
   login as loginApi,
+  logout as logOutApi,
   signUp as signUpApi,
 } from "@/_auth/apiAuth";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -45,4 +46,19 @@ export function useUser() {
   });
 
   return { user, isLoading, isAuthenticated: user?.role === "authenticated" };
+}
+
+export function useLogout() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const { mutate: logout } = useMutation({
+    mutationFn: () => logOutApi(),
+    onSuccess: () => {
+      queryClient.setQueryData(["user"], null);
+      navigate("/sign-in", { replace: true });
+    },
+  });
+
+  return { logout };
 }
