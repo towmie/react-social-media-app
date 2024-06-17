@@ -20,10 +20,10 @@ import {
   signInAccount,
   signOutAccount,
   updatePost,
-} from "../appwrite/api";
+} from "../supabase/api";
 import { INewPost, INewUser, IUpdatePost } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
-import { appwriteConfig, databases } from "../appwrite/config";
+import { appwriteConfig, databases } from "../supabase/config";
 
 export function useCreateUserAccount() {
   return useMutation({
