@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import Actions from "./Actions";
 import { useState } from "react";
 
-function UserPost() {
+function UserPost({ likes, replies, postTitle, postImg }) {
   const [liked, setLiked] = useState();
   return (
     <Link to="/mark/post/12">
@@ -54,17 +54,28 @@ function UserPost() {
               <BsThreeDots />
             </Flex>
           </Flex>
-          <Text fontSize={"sm"}>This is my first post</Text>
-          <Box
-            borderRadius={6}
-            overflow={"hidden"}
-            border={"1px solid"}
-            borderColor={"gray.light"}
-          >
-            <Image src="/post1.png" w={"full"} />
-          </Box>
+          <Text fontSize={"sm"}>{postTitle}</Text>
+          {postImg && (
+            <Box
+              borderRadius={6}
+              overflow={"hidden"}
+              border={"1px solid"}
+              borderColor={"gray.light"}
+            >
+              <Image src={postImg} w={"full"} />
+            </Box>
+          )}
           <Flex gap={2}>
             <Actions liked={liked} setLiked={setLiked} />
+          </Flex>
+          <Flex gap={2} alignItems={"center"}>
+            <Text color={"gray.light"} fontSize={"sm"}>
+              {replies} replies
+            </Text>
+            <Box w={0.5} h={0.5} borderRadius={"full"} bg={"gray.light"}></Box>
+            <Text color={"gray.light"} fontSize={"sm"}>
+              {likes} likes
+            </Text>
           </Flex>
         </Flex>
       </Flex>
